@@ -748,18 +748,60 @@ async function uploadFileToDrive(){
   statusEl.textContent='Searching for folder: '+tag+'...';
 
   try{
-    // Search folder by exact TAG name anywhere in Drive
-    const query=`name='${tag}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
-    const searchRes=await fetch(
-      'https://www.googleapis.com/drive/v3/files?q='+encodeURIComponent(query)+'&fields=files(id,name,parents)',
-      {headers:{Authorization:'Bearer '+googleAccessToken}}
-    );
-    const searchData=await searchRes.json();
+    // Detect KAR-1 or KAR-2 from refinery field
+    const refinery=document.getElementById('fRefinery').value.toUpperCase();
+    let karFolder=null;
+    if(refinery.includes('KAR-1')||refinery.includes('KAR 1')){
+      karFolder='KAR-1';
+    } else if(refinery.includes('KAR-2')||refinery.includes('KAR 2')){
+      karFolder='KAR-2';
+    }
+
+    // Search folder by name, optionally within KAR parent folder
+    async function searchFolderInParent(name, parentId){
+      let q=`name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+      if(parentId) q+=` and '${parentId}' in parents`;
+      const r=await fetch('https://www.googleapis.com/drive/v3/files?q='+encodeURIComponent(q)+'&fields=files(id,name)',
+        {headers:{Authorization:'Bearer '+googleAccessToken}});
+      const d=await r.json();
+      return (d.files&&d.files.length>0)?d.files[0]:null;
+    }
+
+    // Tag variants to try: B-E-106 → E-106
+    const tagVariants=[tag];
+    const stripped=tag.replace(/^[A-Z]-/,'');
+    if(stripped!==tag)tagVariants.push(stripped);
+    const parts=tag.split('-');
+    if(parts.length>2){
+      const lastTwo=parts.slice(-2).join('-');
+      if(!tagVariants.includes(lastTwo))tagVariants.push(lastTwo);
+    }
 
     let folderId=null;
-    if(searchData.files&&searchData.files.length>0){
-      folderId=searchData.files[0].id;
-      statusEl.textContent='Folder found: '+tag+'. Uploading...';
+    let foundName=tag;
+
+    // Step 1: Find KAR parent folder if detected
+    let karParentId=null;
+    if(karFolder){
+      statusEl.textContent='Searching in '+karFolder+'...';
+      const karFolderObj=await searchFolderInParent(karFolder, null);
+      if(karFolderObj)karParentId=karFolderObj.id;
+    }
+
+    // Step 2: Search tag folder inside KAR parent first, then anywhere
+    for(const v of tagVariants){
+      // Try inside KAR folder first
+      if(karParentId){
+        const f=await searchFolderInParent(v, karParentId);
+        if(f){folderId=f.id;foundName=v;break;}
+      }
+      // Fallback: search anywhere in Drive
+      const f=await searchFolderInParent(v, null);
+      if(f){folderId=f.id;foundName=v;break;}
+    }
+
+    if(folderId){
+      statusEl.textContent='Folder found: '+(karFolder?karFolder+' → ':'')+foundName+'. Uploading...';
     } else {
       statusEl.textContent='Folder "'+tag+'" not found. Uploading to Drive root...';
       toast('Folder '+tag+' not found — uploaded to Drive root.','warning');
