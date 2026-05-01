@@ -588,6 +588,16 @@ input[type="file"]{display:none;}
         <div class="form-group full"><label class="form-label">Remark</label><textarea class="form-textarea" id="fRemark" placeholder="Optional notes..."></textarea></div>
       </div>
       <div style="margin-top:12px;padding:10px 14px;background:#f1f8e9;border-radius:5px;border:1px solid #c8e6c9;font-size:11px;color:#388e3c;">💡 Write the Maintenance Card name first — date, year, tag and refinery will auto-fill.</div>
+      <div style="margin-top:12px;padding:12px 14px;background:#e3f2fd;border-radius:5px;border:1px solid #bbdefb;">
+        <div style="font-size:11px;font-weight:600;color:#1565c0;margin-bottom:8px;">📎 Attach File to Drive</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="file" id="attachFile" style="display:none" onchange="handleFileSelected(this)">
+          <button onclick="document.getElementById('attachFile').click()" style="padding:6px 14px;background:#1565c0;color:white;border:none;border-radius:4px;font-size:12px;cursor:pointer;">📎 Select File</button>
+          <span id="attachFileName" style="font-size:12px;color:#5a6a80;">No file selected</span>
+          <button id="uploadBtn" onclick="uploadFileToDrive()" style="display:none;padding:6px 14px;background:#27ae60;color:white;border:none;border-radius:4px;font-size:12px;cursor:pointer;">⬆️ Upload to Drive</button>
+        </div>
+        <div id="uploadStatus" style="margin-top:6px;font-size:11px;color:#5a6a80;"></div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
@@ -601,6 +611,10 @@ input[type="file"]{display:none;}
 
 <script>
 const API="https://script.google.com/macros/s/AKfycbxawzOYGghocVJrWHlQyjtLf8Dngr5VSDsd1_Nh5h5YxvQ3NB1zMVpZWrd8mf-kAGTr/exec";
+const GOOGLE_CLIENT_ID="254833341373-ekodg8gnuqmbj68lb2qf6svbos9kj7fm.apps.googleusercontent.com";
+const DRIVE_SCOPE="https://www.googleapis.com/auth/drive.file";
+let googleAccessToken=null;
+let googleTokenExpiry=0;
 let allRecords=[],filteredRecords=[],equipmentList=[];
 let currentPage=1,PAGE_SIZE=25,editingIndex=null;
 let sortCol='rowIndex',sortAsc=false,cbId=0;
@@ -659,6 +673,126 @@ function jsonp(params){
     s.onerror=()=>{clearTimeout(timer);delete window[cb];reject(new Error('Script error'));};
     document.head.appendChild(s);
   });
+}
+
+// ── GOOGLE OAUTH ──────────────────────────────
+function signInGoogle(){
+  const params=new URLSearchParams({
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: window.location.origin+window.location.pathname,
+    response_type: 'token',
+    scope: DRIVE_SCOPE,
+    prompt: 'consent'
+  });
+  window.location.href='https://accounts.google.com/o/oauth2/v2/auth?'+params.toString();
+}
+
+function checkGoogleToken(){
+  // Check URL hash for token (after OAuth redirect)
+  const hash=window.location.hash;
+  if(hash.includes('access_token')){
+    const params=new URLSearchParams(hash.substring(1));
+    googleAccessToken=params.get('access_token');
+    const expiresIn=parseInt(params.get('expires_in'))||3600;
+    googleTokenExpiry=Date.now()+(expiresIn*1000);
+    // Clean URL
+    history.replaceState(null,'',window.location.pathname);
+    updateGoogleBtn(true);
+    toast('Google Drive connected!','success');
+  } else if(googleAccessToken && Date.now()<googleTokenExpiry){
+    updateGoogleBtn(true);
+  }
+}
+
+function updateGoogleBtn(connected){
+  const btn=document.getElementById('googleSignInBtn');
+  if(!btn)return;
+  if(connected){
+    btn.innerHTML='<span>✅</span> Drive Connected';
+    btn.style.color='#4cd98a';
+    btn.style.borderColor='#4cd98a';
+    btn.onclick=null;
+    btn.style.cursor='default';
+  }
+}
+
+function isTokenValid(){
+  return googleAccessToken && Date.now()<googleTokenExpiry;
+}
+
+// ── DRIVE FILE UPLOAD ──────────────────────────
+let selectedFile=null;
+
+function handleFileSelected(input){
+  selectedFile=input.files[0];
+  if(!selectedFile)return;
+  document.getElementById('attachFileName').textContent=selectedFile.name;
+  document.getElementById('uploadBtn').style.display='inline-block';
+}
+
+async function uploadFileToDrive(){
+  if(!selectedFile){toast('No file selected.','error');return;}
+  if(!isTokenValid()){
+    toast('Please connect Google Drive first.','error');
+    signInGoogle();
+    return;
+  }
+  const tag=document.getElementById('fTag').value.trim();
+  if(!tag){toast('Please fill in TAG first.','error');return;}
+
+  const statusEl=document.getElementById('uploadStatus');
+  const uploadBtn=document.getElementById('uploadBtn');
+  uploadBtn.textContent='⏳ Uploading...';
+  uploadBtn.disabled=true;
+  statusEl.textContent='Searching for folder: '+tag+'...';
+
+  try{
+    // Step 1: Find folder by TAG name
+    const searchRes=await fetch(
+      `https://www.googleapis.com/drive/v3/files?q=name='${encodeURIComponent(tag)}'+and+mimeType='application/vnd.google-apps.folder'+and+trashed=false&fields=files(id,name)`,
+      {headers:{Authorization:'Bearer '+googleAccessToken}}
+    );
+    const searchData=await searchRes.json();
+    
+    let folderId=null;
+    if(searchData.files&&searchData.files.length>0){
+      folderId=searchData.files[0].id;
+      statusEl.textContent='Folder found: '+tag+'. Uploading file...';
+    } else {
+      statusEl.textContent='Folder not found for TAG: '+tag+'. Uploading to root...';
+      toast('Folder for TAG '+tag+' not found — uploading to Drive root.','warning');
+    }
+
+    // Step 2: Upload file
+    const metadata={name:selectedFile.name};
+    if(folderId)metadata.parents=[folderId];
+
+    const form=new FormData();
+    form.append('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));
+    form.append('file',selectedFile);
+
+    const uploadRes=await fetch(
+      'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink',
+      {method:'POST',headers:{Authorization:'Bearer '+googleAccessToken},body:form}
+    );
+    const uploadData=await uploadRes.json();
+
+    if(uploadData.id){
+      statusEl.innerHTML='✅ Uploaded: <a href="'+uploadData.webViewLink+'" target="_blank" style="color:#1565c0">'+uploadData.name+'</a>';
+      toast('File uploaded successfully!','success');
+      uploadBtn.textContent='✅ Uploaded';
+    } else {
+      statusEl.textContent='❌ Upload failed: '+(uploadData.error?.message||'Unknown error');
+      toast('Upload failed.','error');
+      uploadBtn.textContent='⬆️ Upload to Drive';
+      uploadBtn.disabled=false;
+    }
+  }catch(e){
+    statusEl.textContent='❌ Error: '+e.message;
+    toast('Upload error: '+e.message,'error');
+    uploadBtn.textContent='⬆️ Upload to Drive';
+    uploadBtn.disabled=false;
+  }
 }
 
 // ── INIT ───────────────────────────────────────
@@ -1166,6 +1300,7 @@ function clearMCForm(){
 
 // Init
 addStep();addStep();addStep();
+checkGoogleToken();
 init();
 </script>
 </body>
