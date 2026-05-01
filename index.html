@@ -613,7 +613,7 @@ input[type="file"]{display:none;}
 <script>
 const API="https://script.google.com/macros/s/AKfycbxawzOYGghocVJrWHlQyjtLf8Dngr5VSDsd1_Nh5h5YxvQ3NB1zMVpZWrd8mf-kAGTr/exec";
 const GOOGLE_CLIENT_ID="254833341373-ekodg8gnuqmbj68lb2qf6svbos9kj7fm.apps.googleusercontent.com";
-const DRIVE_SCOPE="https://www.googleapis.com/auth/drive.file";
+const DRIVE_SCOPE="https://www.googleapis.com/auth/drive";
 let googleAccessToken=null;
 let googleTokenExpiry=0;
 let allRecords=[],filteredRecords=[],equipmentList=[];
@@ -748,23 +748,24 @@ async function uploadFileToDrive(){
   statusEl.textContent='Searching for folder: '+tag+'...';
 
   try{
-    // Step 1: Find folder by TAG name
+    // Search folder by exact TAG name anywhere in Drive
+    const query=`name='${tag}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
     const searchRes=await fetch(
-      `https://www.googleapis.com/drive/v3/files?q=name='${encodeURIComponent(tag)}'+and+mimeType='application/vnd.google-apps.folder'+and+trashed=false&fields=files(id,name)`,
+      'https://www.googleapis.com/drive/v3/files?q='+encodeURIComponent(query)+'&fields=files(id,name,parents)',
       {headers:{Authorization:'Bearer '+googleAccessToken}}
     );
     const searchData=await searchRes.json();
-    
+
     let folderId=null;
     if(searchData.files&&searchData.files.length>0){
       folderId=searchData.files[0].id;
-      statusEl.textContent='Folder found: '+tag+'. Uploading file...';
+      statusEl.textContent='Folder found: '+tag+'. Uploading...';
     } else {
-      statusEl.textContent='Folder not found for TAG: '+tag+'. Uploading to root...';
-      toast('Folder for TAG '+tag+' not found — uploading to Drive root.','warning');
+      statusEl.textContent='Folder "'+tag+'" not found. Uploading to Drive root...';
+      toast('Folder '+tag+' not found — uploaded to Drive root.','warning');
     }
 
-    // Step 2: Upload file
+    // Upload file
     const metadata={name:selectedFile.name};
     if(folderId)metadata.parents=[folderId];
 
@@ -779,19 +780,19 @@ async function uploadFileToDrive(){
     const uploadData=await uploadRes.json();
 
     if(uploadData.id){
-      statusEl.innerHTML='✅ Uploaded: <a href="'+uploadData.webViewLink+'" target="_blank" style="color:#1565c0">'+uploadData.name+'</a>';
-      toast('File uploaded successfully!','success');
+      statusEl.innerHTML='✅ <a href="'+uploadData.webViewLink+'" target="_blank" style="color:#1565c0">'+uploadData.name+'</a>';
+      toast('File uploaded to '+tag+' folder!','success');
       uploadBtn.textContent='✅ Uploaded';
     } else {
-      statusEl.textContent='❌ Upload failed: '+(uploadData.error?.message||'Unknown error');
+      statusEl.textContent='❌ '+(uploadData.error?.message||'Upload failed');
       toast('Upload failed.','error');
-      uploadBtn.textContent='⬆️ Upload to Drive';
+      uploadBtn.textContent='⬆️ Upload';
       uploadBtn.disabled=false;
     }
   }catch(e){
     statusEl.textContent='❌ Error: '+e.message;
-    toast('Upload error: '+e.message,'error');
-    uploadBtn.textContent='⬆️ Upload to Drive';
+    toast('Upload error.','error');
+    uploadBtn.textContent='⬆️ Upload';
     uploadBtn.disabled=false;
   }
 }
@@ -1115,6 +1116,16 @@ function openModal(record=null){
     const maxNo=allRecords.reduce((max,r)=>{const n=parseInt(r['ITEM NO.'])||0;return n>max?n:max;},0);
     document.getElementById('fItemNo').value=maxNo+1;
   }
+  // Reset attach section
+  selectedFile=null;
+  const fn=document.getElementById('attachFileName');
+  const ub=document.getElementById('uploadBtn');
+  const us=document.getElementById('uploadStatus');
+  const af=document.getElementById('attachFile');
+  if(fn)fn.textContent='No file selected';
+  if(ub){ub.style.display='none';ub.textContent='⬆️ Upload to Drive';ub.disabled=false;}
+  if(us)us.textContent='';
+  if(af)af.value='';
   document.getElementById('modalOverlay').classList.add('open');
 }
 function closeModal(){document.getElementById('modalOverlay').classList.remove('open');editingIndex=null;}
