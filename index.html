@@ -276,61 +276,62 @@ input[type="date"].mcd-cell-inp{color:#111827;width:100%;}
 
 /* ══ PRINT ══ */
 @media print {
-  /* 1. OCULTAMOS LA INTERFAZ */
+  /* 1. Ocultamos la interfaz, barras de zoom y capas de imagen/canvas */
   .sidebar, .main-header, .search-panel, .stats-bar, .pagination, .td-actions,
   .modal-overlay, .toast-container, .mc-bottom-bar, .mc-zoom-bar, 
   #eqView, .mc-canvas-layer, .mc-render-canvas { 
     display: none !important; 
   }
 
-  /* 2. CONFIGURACIÓN DEL HISTORIAL (MC HISTORY) */
-  #trackingView, .table-wrapper {
+  /* 2. Forzamos que el contenedor no use transformaciones (evita el efecto imagen) */
+  .mc-doc-scaler { 
+    transform: none !important; 
+    margin: 0 auto !important;
     display: block !important;
-    width: 100% !important;
   }
-  table {
-    width: 100% !important;
-    border-collapse: collapse;
-    font-size: 10px; /* Tamaño ideal para que el historial quepa en el papel */
-  }
-  th, td {
-    border: 1px solid #D1D5DB !important;
-    padding: 6px !important;
-    color: black !important;
-  }
-
-  /* 3. CONFIGURACIÓN DE LA TARJETA (MAINTENANCE CARD) */
-  #mcView, .mc-doc-outer, #printOutput {
-    display: block !important;
-    position: relative !important;
-  }
+  
   .mc-doc-outer { 
     padding: 0 !important; 
     margin: 0 !important; 
     background: white !important;
   }
-  .mc-doc-scaler { 
-    transform: none !important; /* Esto es lo que quita el efecto de imagen */
-    margin: 0 auto !important;
-    display: block !important;
-  }
 
-  /* 4. ESTILO DE LA HOJA (TEXTO SELECCIONABLE) */
-  .mc-page, .mc-doc-page { 
-    background: #fff !important; 
-    padding: 24px 28px !important;
-    max-width: 680px !important;
-    margin: 0 auto !important;
-    page-break-after: always;
-    box-shadow: none !important;
-  }
-
-  /* 5. AJUSTES GENERALES */
-  .main { margin-left: 0 !important; }
-  body { 
-    background: white !important; 
-    font-family: 'Segoe UI', Tahoma, sans-serif !important; 
-  }
+  /* 3. Mantenemos tus estilos originales de diseño */
+  .main{margin-left:0;}
+  body{background:white;font-family:'Segoe UI',Tahoma,sans-serif;font-size:12px;}
+  #printOutput{display:block!important;}
+  .page-label{font-size:10px;font-weight:500;color:#6B7280;text-transform:uppercase;letter-spacing:.08em;padding:8px 0 6px;display:flex;align-items:center;gap:8px;}
+  .page-label::after{content:'';flex:1;height:.5px;background:#E5E7EB;}
+  
+  /* Tu diseño de página original */
+  .mc-page{background:#fff;border:.5px solid #E5E7EB;padding:24px 28px;max-width:680px;margin:0 auto 24px;page-break-after:always;}
+  .mc-page:last-child{page-break-after:auto;}
+  .mc-header{display:flex;align-items:flex-start;justify-content:space-between;border-bottom:2px solid #1a1f2e;padding-bottom:12px;margin-bottom:14px;}
+  
+  /* Tus estilos de logo y celdas (Copiados de tu versión anterior) */
+  .logo-circle-p{width:44px;height:44px;border-radius:50%;background:#CC2222;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;font-style:italic;flex-shrink:0;}
+  .logo-area-p{display:flex;align-items:center;gap:10px;}
+  .logo-text-p{font-size:10px;font-weight:700;color:#1a1f2e;letter-spacing:.04em;text-transform:uppercase;line-height:1.4;}
+  .logo-sub-p{font-size:9px;color:#6B7280;margin-top:1px;}
+  .titles-p{text-align:right;}
+  .main-title-p{font-size:14px;font-weight:700;color:#1a1f2e;letter-spacing:.04em;text-transform:uppercase;}
+  .sub-title-p{font-size:11px;font-weight:500;color:#CC2222;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
+  .wo-chip-p{font-family:Consolas,monospace;font-size:10px;color:#9CA3AF;background:#F3F4F6;border-radius:3px;padding:1px 6px;margin-top:4px;display:inline-block;}
+  
+  /* El grid de información que tanto te gusta */
+  .ig{display:grid;grid-template-columns:1fr 1fr;border:1px solid #D1D5DB;margin-bottom:12px;}
+  .ic{padding:5px 9px;border-right:1px solid #D1D5DB;border-bottom:1px solid #D1D5DB;}
+  .ic:nth-child(even){border-right:none;}
+  .ic.full{grid-column:1/-1;border-right:none;}
+  .ic:nth-last-child(-n+2):not(.full){border-bottom:none;}
+  .ic-lbl{font-size:8px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;}
+  .ic-val{font-size:12px;font-weight:500;color:#111827;}
+  .tag-val-p{font-family:Consolas,monospace;font-size:13px;font-weight:700;color:#CC2222;}
+  
+  /* Firmas y tablas del historial */
+  .sigs{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:12px;}
+  .sig-line{border-bottom:1px solid #1a1f2e;height:36px;margin-bottom:5px;}
+  
   * { 
     -webkit-print-color-adjust: exact !important; 
     print-color-adjust: exact !important; 
