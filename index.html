@@ -1060,7 +1060,7 @@ function openModal(record=null){
   editingIndex=record?record.rowIndex:null;
   document.getElementById('modalTitle').textContent=record?'Edit Record':'New Maintenance Record';
   const map={fItemNo:'ITEM NO.',fDate:'MAINTENANCE DATE',fYear:'YEAR',fTag:'TAG',fAsset:'ASSOCIATED ASSET',fRefinery:'REFINERY',fActivity:'ACTIVITY DESCRIPTION',fRemark:'REMARK'};
-  Object.entries(map).forEach(([id,key])=>{document.getElementById(id).value=record?(String(record[key]||'').substring(0,10)||String(record[key]||''));});
+  Object.entries(map).forEach(([id,key])=>{document.getElementById(id).value=record?(String(record[key]||'').substring(0,10)||String(record[key]||''))});
   document.getElementById('fCard').value=record?(record['MAINTENANCE CARD']||''):'';
   if(!record){const maxNo=allRecords.reduce((max,r)=>{const n=parseInt(r['ITEM NO.'])||0;return n>max?n:max;},0);document.getElementById('fItemNo').value=maxNo+1;}
   selectedFile=null;
