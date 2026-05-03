@@ -283,9 +283,10 @@ input[type="date"].mcd-cell-inp{color:#111827;width:100%;}
   }
   .main{margin-left:0;}
   
-  /* Esto es lo nuevo para que sea PDF real y no captura */
+  /* Ajuste para PDF real y eliminación de recuadros grises/sombras */
   .mc-doc-scaler { transform: none !important; display: block !important; }
-  .mc-doc-outer { padding-top: 0 !important; margin-top: 0 !important; }
+  .mc-doc-outer { padding-top: 0 !important; margin-top: 0 !important; background: white !important; }
+  .mc-doc-page { box-shadow: none !important; border: none !important; }
 
   body{background:white;font-family:'Segoe UI',Tahoma,sans-serif;font-size:12px;}
   #printOutput{display:block!important;}
