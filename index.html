@@ -276,57 +276,64 @@ input[type="date"].mcd-cell-inp{color:#111827;width:100%;}
 
 /* ══ PRINT ══ */
 @media print {
-  /* Ocultamos todo lo que no sea contenido informativo */
-  .sidebar, .main-header, .search-panel, .stats-bar, 
-  .toast-container, .mc-zoom-bar, .mc-bottom-bar,
-  #printOutput, #loadAllBanner, .actions-column { 
-    display: none !important; 
+  /* 1. OCULTAR TODO LO QUE NO SEA REPORTE */
+  .sidebar, .main-header, .search-panel, .stats-bar, .pagination, .td-actions,
+  .modal-overlay, .toast-container, .mc-bottom-bar, #eqView, #loadAllBanner, .actions-column {
+    display: none !important;
   }
 
   .main { margin-left: 0 !important; }
-  body { background: white; }
+  body { background: white; font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 12px; }
 
-  /* 
-     LÓGICA DINÁMICA: 
-     Si estamos viendo la tabla (trackingView), la mostramos.
-     Si estamos viendo la ficha (mcView), la mostramos.
-  */
-  #trackingView, #mcView, .table-wrapper {
+  /* 2. LÓGICA PARA IMPRIMIR MC HISTORY (La Tabla) */
+  /* Solo se muestra si NO estamos en la vista de la Card individual */
+  #trackingView, .table-wrapper {
     display: block !important;
     width: 100% !important;
   }
 
-  /* Ajustes para la tabla de historial (MC HISTORY) */
-  .table-wrapper {
-    overflow: visible !important;
-  }
   table {
     width: 100% !important;
     border-collapse: collapse;
-    font-size: 10px; /* Tamaño reducido para que quepa el historial */
-  }
-  th, td {
-    border: 1px solid #ddd !important;
-    padding: 4px !important;
+    font-size: 10px; /* Tamaño para que el historial quepa en la hoja */
   }
 
-  /* Ajustes para la ficha individual (MC Card) */
-  .mc-doc-outer { background: white !important; padding: 0 !important; min-height: 0 !important; }
-  .mc-doc-scaler { display: block !important; }
-  .mc-doc { transform: none !important; width: 100% !important; gap: 0 !important; }
-  .mc-doc-page { 
-    box-shadow: none !important; 
-    margin: 0 !important; 
-    padding: 14px 20px !important; 
-    width: 100% !important; 
-    min-height: 0 !important; 
-    page-break-after: always; 
+  th, td {
+    border: 1px solid #D1D5DB !important;
+    padding: 6px !important;
   }
+
+  /* 3. LÓGICA PARA IMPRIMIR MC CARD (El Formulario) */
+  /* Usamos tu diseño original de .mc-page para que salga perfecto */
+  #printOutput { display: block !important; }
   
-  .mcd-cell-inp { border: none !important; background: transparent !important; }
+  .mc-page {
+    background: #fff;
+    border: .5px solid #E5E7EB;
+    padding: 24px 28px;
+    max-width: 680px;
+    margin: 0 auto 24px;
+    page-break-after: always;
+  }
+
+  /* Estilos de cabecera y diseño que ya tenías */
+  .mc-header { display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 2px solid #1a1f2e; padding-bottom: 12px; margin-bottom: 14px; }
+  .logo-circle-p { width: 44px; height: 44px; border-radius: 50%; background: #CC2222; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #fff; font-style: italic; flex-shrink: 0; }
+  .logo-area-p { display: flex; align-items: center; gap: 10px; }
+  .logo-text-p { font-size: 10px; font-weight: 700; color: #1a1f2e; letter-spacing: .04em; text-transform: uppercase; line-height: 1.4; }
+  .main-title-p { font-size: 14px; font-weight: 700; color: #1a1f2e; letter-spacing: .04em; text-transform: uppercase; }
+  
+  /* Celdas y Grid del formulario */
+  .ig { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #D1D5DB; margin-bottom: 12px; }
+  .ic { padding: 5px 9px; border-right: 1px solid #D1D5DB; border-bottom: 1px solid #D1D5DB; }
+  .ic-lbl { font-size: 8px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; margin-bottom: 2px; }
+  .ic-val { font-size: 12px; font-weight: 500; color: #111827; }
+
+  /* Forzar colores para que salgan los rojos y negros en la impresora */
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
-#printOutput{display:none;}
+
+#printOutput { display: none; }
 </style>
 </head>
 <body data-view="tracking">
