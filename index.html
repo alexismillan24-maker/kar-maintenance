@@ -1149,7 +1149,17 @@ function generateMC(rowIndex){
     if(eq){
       document.getElementById('mcService').value=eq['SERVICE']||'';
       const kar=eq['KAR']||'';
-      const
+      const unit=eq['UNIT']||'';
+      const plant=eq['PLANT']||'';
+      const parts=[kar,unit,plant].filter(Boolean);
+      if(parts.length)document.getElementById('mcLoc').value=parts.join(', ');
+    }
+  }
+  if(!document.getElementById('mcLoc').value)document.getElementById('mcLoc').value=r['REFINERY']||'';
+  updateTypeDisplay();
+  switchView('card');
+  toast('Form pre-filled from record.','info');
+}
 
 // ── PRINT ROW ──────────────────────────────────
 function printRow(ri){
