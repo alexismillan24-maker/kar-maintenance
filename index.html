@@ -233,7 +233,7 @@ input[type="date"].mcd-cell-inp{color:#111827;width:100%;}
 /* Sections */
 .mcd-section{margin-bottom:11px;}
 .mcd-sec-hd{font-size:9px;font-weight:700;color:white;background:#1a1f2e;padding:4px 9px;text-transform:uppercase;letter-spacing:.06em;}
-.mcd-ta{width:100%;border:1px solid #D1D5DB;border-top:none;padding:8px 10px;font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#374151;line-height:1.65;resize:vertical;min-height:72px;outline:none;box-sizing:border-box;background:white;}
+.mcd-ta{width:100%;border:1px solid #D1D5DB;border-top:none;padding:8px 10px;font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#374151;line-height:1.65;resize:vertical;min-height:24px;outline:none;box-sizing:border-box;background:white;}
 .mcd-ta:focus{background:#fafbff;}
 .mcd-ta::placeholder{color:#D1D5DB;font-style:italic;}
 
@@ -544,76 +544,69 @@ input[type="date"].mcd-cell-inp{color:#111827;width:100%;}
             </div>
 
             <!-- Info Grid -->
-            <table class="mcd-info-grid">
-              <tr>
-                <td style="width:50%">
-                  <div class="mcd-cell-lbl">Start Date *</div>
-                  <input type="date" class="mcd-cell-inp" id="mcStart">
-                </td>
-                <td style="width:50%">
-                  <div class="mcd-cell-lbl">End Date</div>
-                  <input type="date" class="mcd-cell-inp" id="mcEnd">
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="mcd-cell-lbl">TAG *</div>
-                  <input class="mcd-cell-inp tag-inp" id="mcTag" placeholder="e.g. C-E-106" oninput="updateTypeDisplay()">
-                </td>
-                <td>
-                  <div class="mcd-cell-lbl">Location *</div>
-                  <input class="mcd-cell-inp" id="mcLoc" placeholder="e.g. KAR-2, Plant-C">
-                </td>
-              </tr>
-              <tr>
-                <td colspan="2">
-                  <div class="mcd-cell-lbl">Service</div>
-                  <input class="mcd-cell-inp" id="mcService" placeholder="e.g. Kerosene Trim Cooler" style="width:100%">
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="mcd-cell-lbl">Equipment Type *</div>
-                  <input class="mcd-cell-inp" id="mcType" placeholder="e.g. HEAT EXCHANGER" oninput="updateTypeDisplay()">
-                </td>
-                <td>
-                  <div class="mcd-cell-lbl">Applicable Code</div>
-                  <input class="mcd-cell-inp" id="mcCode" placeholder="e.g. API 573">
-                </td>
-              </tr>
-            </table>
+           <table class="mcd-info-grid">
+  <tr>
+    <td style="width:50%">
+      <div class="mcd-cell-lbl">Start Date *</div>
+      <input type="date" class="mcd-cell-inp" id="mcStart">
+    </td>
+    <td style="width:50%">
+      <div class="mcd-cell-lbl">End Date</div>
+      <input type="date" class="mcd-cell-inp" id="mcEnd">
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div class="mcd-cell-lbl">TAG *</div>
+      <input class="mcd-cell-inp tag-inp" id="mcTag" placeholder="e.g. C-E-106" oninput="updateTypeDisplay()">
+    </td>
+    <td>
+      <div class="mcd-cell-lbl">Location *</div>
+      <input class="mcd-cell-inp" id="mcLoc" placeholder="e.g. KAR-2, Plant-C">
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div class="mcd-cell-lbl">Service</div>
+      <input class="mcd-cell-inp" id="mcService" placeholder="e.g. Kerosene Trim Cooler" style="width:100%">
+    </td>
+    <td>
+      <div class="mcd-cell-lbl">Applicable Code</div>
+      <input class="mcd-cell-inp" id="mcCode" placeholder="e.g. API 573">
+    </td>
+  </tr>
+  <input type="hidden" id="mcType" oninput="updateTypeDisplay()">
+</table>
 
             <!-- Classification -->
-            <table class="mcd-class-table">
-              <thead>
-                <tr>
-                  <th style="width:110px">Maint. Type</th>
-                  <th>Classification</th>
-                  <th style="width:130px">Priority</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="font-size:11px;font-weight:600;background:#f9fafb">INPUT</td>
-                  <td>
-                    <div class="mcd-check-row">
-                      <label class="mcd-ck"><input type="checkbox" id="ckPrev"> Preventive</label>
-                      <label class="mcd-ck"><input type="checkbox" id="ckCorr"> Corrective</label>
-                      <label class="mcd-ck"><input type="checkbox" id="ckRedes"> Re-Design</label>
-                      <label class="mcd-ck"><input type="checkbox" id="ckRepl"> Replacement</label>
-                      <label class="mcd-ck"><input type="checkbox" id="ckOther"> Other</label>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="mcd-radio-col">
-                      <label class="mcd-ck"><input type="radio" name="prio" value="Urgent (U)"> Urgent (U)</label>
-                      <label class="mcd-ck"><input type="radio" name="prio" value="Normal (N)"> Normal (N)</label>
-                      <label class="mcd-ck"><input type="radio" name="prio" value="Planned (P)"> Planned (P)</label>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+<table class="mcd-class-table">
+  <thead>
+    <tr>
+      <th>Classification</th>
+      <th style="width:160px">Priority</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <div class="mcd-check-row">
+          <label class="mcd-ck"><input type="checkbox" id="ckPrev"> Preventive</label>
+          <label class="mcd-ck"><input type="checkbox" id="ckCorr"> Corrective</label>
+          <label class="mcd-ck"><input type="checkbox" id="ckRedes"> Re-Design</label>
+          <label class="mcd-ck"><input type="checkbox" id="ckRepl"> Replacement</label>
+          <label class="mcd-ck"><input type="checkbox" id="ckOther"> Other</label>
+        </div>
+      </td>
+      <td>
+        <div class="mcd-check-row">
+          <label class="mcd-ck"><input type="radio" name="prio" value="Urgent (U)"> Urgent (U)</label>
+          <label class="mcd-ck"><input type="radio" name="prio" value="Normal (N)"> Normal (N)</label>
+          <label class="mcd-ck"><input type="radio" name="prio" value="Planned (P)"> Planned (P)</label>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
             <!-- Background -->
             <div class="mcd-section">
@@ -1155,15 +1148,8 @@ function generateMC(rowIndex){
     const eq=equipmentList.find(e=>String(e['TAG']||'').toUpperCase()===t)||equipmentList.find(e=>String(e['TAG']||'').toUpperCase().startsWith(t.split('-').slice(0,2).join('-')));
     if(eq){
       document.getElementById('mcService').value=eq['SERVICE']||'';
-      if(eq['KAR'])document.getElementById('mcLoc').value=[eq['KAR'],eq['UNIT']?'Unit-'+eq['UNIT']:'',eq['PLANT']?'Plant-'+eq['PLANT']:''].filter(Boolean).join(', ');
-      else if(eq['UNIT'])document.getElementById('mcLoc').value=eq['UNIT'];
-    }
-  }
-  if(!document.getElementById('mcLoc').value)document.getElementById('mcLoc').value=r['REFINERY']||'';
-  updateTypeDisplay();
-  switchView('card');
-  toast('Form pre-filled from record.','info');
-}
+      const kar=eq['KAR']||'';
+      const
 
 // ── PRINT ROW ──────────────────────────────────
 function printRow(ri){
@@ -1223,10 +1209,12 @@ function removePhoto(i){
 function mcVal(id){return(document.getElementById(id)||{}).value||'';}
 
 function printMC(){
-  if(!mcVal('mcTag')||!mcVal('mcStart')){toast('Fill in TAG and Start Date before printing.','error');return;}
+  const cardName = mcVal('mcWO') || mcVal('mcTag') || 'KAR - Mechanical Maintenance';
+  const prevTitle = document.title;
+  document.title = cardName;
   window.print();
+  setTimeout(()=>document.title=prevTitle, 1000);
 }
-
 function clearMCForm(){
   ['mcWO','mcStart','mcEnd','mcTag','mcLoc','mcService','mcType','mcCode','mcBg','mcScope','mcActivity','mcComments']
     .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
