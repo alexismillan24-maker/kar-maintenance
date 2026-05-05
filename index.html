@@ -1049,6 +1049,8 @@ function renderTable(){
 }
 
 // ── LAZY FILE BADGES ───────────────────────────
+// ── LAZY FILE BADGES ───────────────────────────
+const fileCache={};
 async function resolveFIleBadges(page){
   const BATCH=5;
   for(let i=0;i<page.length;i+=BATCH){
@@ -1059,27 +1061,24 @@ async function resolveFIleBadges(page){
       if(!card)return;
       const btn=document.getElementById('fb_'+r.rowIndex);
       if(!btn)return;
+      if(fileCache[r.rowIndex]!==undefined){
+        applyFileBadge(btn,fileCache[r.rowIndex]);
+        return;
+      }
       try{
         const res=await jsonp({action:'getFileUrl',filename:card,tag});
-        if(res.success){
-          if(res.type==='folder'){
-            btn.className='file-btn type-folder';
-            btn.innerHTML='📁 Folder';
-          } else {
-            btn.className='file-btn type-file';
-            btn.innerHTML='📄 File';
-          }
-        } else {
-          btn.className='file-btn';
-          btn.style.opacity='.4';
-          btn.innerHTML='— None';
-        }
-      }catch(e){
-        btn.innerHTML='📄 ?';
-      }
+        const result=res.success?res.type:'none';
+        fileCache[r.rowIndex]=result;
+        applyFileBadge(btn,result);
+      }catch(e){btn.innerHTML='📄 ?';}
     }));
     await new Promise(res=>setTimeout(res,300));
   }
+}
+function applyFileBadge(btn,type){
+  if(type==='folder'){btn.className='file-btn type-folder';btn.innerHTML='📁 Folder';}
+  else if(type==='none'){btn.className='file-btn';btn.style.opacity='.4';btn.innerHTML='— None';}
+  else{btn.className='file-btn type-file';btn.innerHTML='📄 File';}
 }
 
 // ── PAGINATION ─────────────────────────────────
