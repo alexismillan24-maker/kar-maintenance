@@ -1014,6 +1014,7 @@ function sortRecords(){filteredRecords.sort((a,b)=>{let va=a[sortCol]||'',vb=b[s
 function fmtDateDisplay(val){if(!val||val==='#ERROR!')return'–';const s=String(val);if(s.length>=10&&s[4]==='-'&&s[7]==='-')return s.substring(0,10);if(s.includes('T'))return s.substring(0,10);return s||'–';}
 
 // ── RENDER TABLE ───────────────────────────────
+// ── RENDER TABLE ───────────────────────────────
 function renderTable(){
   const tbody=document.getElementById('tableBody');
   const start=(currentPage-1)*PAGE_SIZE;
@@ -1023,7 +1024,7 @@ function renderTable(){
     const card=r['MAINTENANCE CARD']||'',tag=r['TAG']||'';
     const date=fmtDateDisplay(r['MAINTENANCE DATE']);
     const sc=card.replace(/\\/g,'\\\\').replace(/'/g,"\\'"),st=tag.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-    const fb=card?`<a href="#" class="file-btn type-file" id="fb_${r.rowIndex}" onclick="openFile('${sc}','${st}',${r.rowIndex});return false;">📄 Open</a>`:'–';
+    const fb=card?`<a href="#" class="file-btn type-file" id="fb_${r.rowIndex}" onclick="openFile('${sc}','${st}',${r.rowIndex});return false;">📄 ?</a>`:'–';
     return`<tr>
       <td class="td-no">${r['ITEM NO.']||(start+i+1)}</td>
       <td class="td-date">${date||'–'}</td>
@@ -1044,6 +1045,41 @@ function renderTable(){
     </tr>`;
   }).join('');
   document.getElementById('pageIndicator').textContent=currentPage;
+  resolveFIleBadges(page);
+}
+
+// ── LAZY FILE BADGES ───────────────────────────
+async function resolveFIleBadges(page){
+  const BATCH=5;
+  for(let i=0;i<page.length;i+=BATCH){
+    const batch=page.slice(i,i+BATCH);
+    await Promise.all(batch.map(async r=>{
+      const card=r['MAINTENANCE CARD']||'';
+      const tag=r['TAG']||'';
+      if(!card)return;
+      const btn=document.getElementById('fb_'+r.rowIndex);
+      if(!btn)return;
+      try{
+        const res=await jsonp({action:'getFileUrl',filename:card,tag});
+        if(res.success){
+          if(res.type==='folder'){
+            btn.className='file-btn type-folder';
+            btn.innerHTML='📁 Folder';
+          } else {
+            btn.className='file-btn type-file';
+            btn.innerHTML='📄 File';
+          }
+        } else {
+          btn.className='file-btn';
+          btn.style.opacity='.4';
+          btn.innerHTML='— None';
+        }
+      }catch(e){
+        btn.innerHTML='📄 ?';
+      }
+    }));
+    await new Promise(res=>setTimeout(res,300));
+  }
 }
 
 // ── PAGINATION ─────────────────────────────────
