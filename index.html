@@ -954,7 +954,7 @@ async function init(loadAll=false){
   try{
     if(!equipmentList.length){const er=await jsonp({action:'getEquipment',module:currentDiscipline});if(er.success){equipmentList=er.data.map(r=>{const clean={};Object.entries(r).forEach(([k,v])=>{let key=k.split('').map(c=>(c==='\n'||c==='\r'||c==='\t')?' ':c).join('').replace(/  +/g,' ').trim();clean[key]=v;});return clean;});}}
     if(cachedRecords[cacheKey]){allRecords=cachedRecords[cacheKey];allRecordsLoaded=loadAll;}
-    else{const rr=await jsonp({action:'getRecords',module:currentDiscipline,limit});if(rr.success){const normalized=normalizeRecords(rr.data).filter(r=>r['MAINTENANCE CARD']||r['TAG']||r['MAINTENANCE DATE']);autoFillAssets(normalized);cachedRecords[cacheKey]=normalized;allRecords=normalized;totalRecords=rr.total||normalized.length;allRecordsLoaded=loadAll||!rr.limited;}}
+    else{const rr=await jsonp({action:'getRecords',module:currentDiscipline,limit});if(rr.success){const normalized=normalizeRecords(rr.data).filter(r=>r['MAITENANCE CARD']||r['TAG']||r['MAINTENANCE DATE']);autoFillAssets(normalized);cachedRecords[cacheKey]=normalized;allRecords=normalized;totalRecords=rr.total||normalized.length;allRecordsLoaded=loadAll||!rr.limited;}}
     document.getElementById('sbCount').textContent=allRecordsLoaded?allRecords.length:allRecords.length+'+';
     if(!allRecordsLoaded)showLoadAllBanner(totalRecords);else hideLoadAllBanner();
     buildFilters();applyFilters();
@@ -987,7 +987,7 @@ function applyFilters(){
   const hasSearch=q||tag||fa||fr||fy||fd||fdt;
   if(hasSearch&&!allRecordsLoaded){toast('Loading all records to search...','info');loadAllRecords().then(()=>applyFilters());return;}
   filteredRecords=allRecords.filter(r=>{
-    if(q&&![r['MAINTENANCE CARD'],r['ACTIVITY DESCRIPTION'],r['REFINERY'],r['REMARK']].join(' ').toLowerCase().includes(q))return false;
+    if(q&&![r['MAITENANCE CARD'],r['ACTIVITY DESCRIPTION'],r['REFINERY'],r['REMARK']].join(' ').toLowerCase().includes(q))return false;
     if(tag&&String(r['TAG']||'').trim().toUpperCase()!==tag)return false;
     if(fa&&r['ASSOCIATED ASSET']!==fa)return false;
     if(fr&&r['REFINERY']!==fr)return false;
@@ -1020,7 +1020,7 @@ function renderTable(){
   const page=filteredRecords.slice(start,start+PAGE_SIZE);
   if(!page.length){tbody.innerHTML=`<tr><td colspan="11"><div class="table-msg"><div class="icon">📋</div><p>No records found.</p></div></td></tr>`;return;}
   tbody.innerHTML=page.map((r,i)=>{
-    const card=r['MAINTENANCE CARD']||'',tag=r['TAG']||'';
+    const card=r['MAITENANCE CARD']||'',tag=r['TAG']||'';
     const date=fmtDateDisplay(r['MAINTENANCE DATE']);
     const sc=card.replace(/\\/g,'\\\\').replace(/'/g,"\\'"),st=tag.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     const fb=card?`<a href="#" class="file-btn type-file" id="fb_${r.rowIndex}" onclick="openFile('${sc}','${st}',${r.rowIndex});return false;">📄 Open</a>`:'–';
@@ -1170,7 +1170,7 @@ function printRow(ri){
   <tr><td class="l">Item No.</td><td>${r['ITEM NO.']||''}</td><td class="l">Date</td><td>${String(r['MAINTENANCE DATE']||'').substring(0,10)}</td></tr>
   <tr><td class="l">Tag</td><td>${r['TAG']||''}</td><td class="l">Year</td><td>${r['YEAR']||''}</td></tr>
   <tr><td class="l">Asset Type</td><td>${r['ASSOCIATED ASSET']||''}</td><td class="l">Refinery</td><td>${r['REFINERY']||''}</td></tr>
-  <tr><td class="l">Maintenance Card</td><td colspan="3">${r['MAINTENANCE CARD']||''}</td></tr>
+  <tr><td class="l">Maintenance Card</td><td colspan="3">${r['MAITENANCE CARD']||''}</td></tr>
   <tr><td class="l">Activity</td><td colspan="3">${r['ACTIVITY DESCRIPTION']||''}</td></tr>
   <tr><td class="l">Remark</td><td colspan="3">${r['REMARK']||''}</td></tr>
   </table><script>window.print();<\/script></body></html>`);
